@@ -30,7 +30,6 @@
     "@types/jsonwebtoken": "^9.0.10",
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
-    "tsx": "^4.22.0",
-    "typescript": "^5"
+    "tsx": "^4.22.0"
   }
 }
