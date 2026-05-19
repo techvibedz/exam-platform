@@ -26,19 +26,29 @@ interface Exam {
   questions: Question[];
 }
 
+interface UserAttempt {
+  id: number;
+  score: number;
+  total: number;
+}
+
 export default function TakeExamPage() {
   const params = useParams();
   const router = useRouter();
   const [exam, setExam] = useState<Exam | null>(null);
+  const [userAttempt, setUserAttempt] = useState<UserAttempt | null>(null);
   const [loading, setLoading] = useState(true);
   const [answers, setAnswers] = useState<Record<number, number[]>>({});
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
   const loadExam = useCallback(async () => {
-    const res = await fetch(`/api/exams/${params.id}`);
-    if (res.ok) {
-      const data = await res.json();
+    const [examRes, checkRes] = await Promise.all([
+      fetch(`/api/exams/${params.id}`),
+      fetch(`/api/exams/${params.id}/status`),
+    ]);
+    if (examRes.ok) {
+      const data = await examRes.json();
       if (!data.isPublished) {
         setError("هذا الاختبار غير متاح حاليا");
       } else {
@@ -46,6 +56,10 @@ export default function TakeExamPage() {
       }
     } else {
       setError("الاختبار غير موجود");
+    }
+    if (checkRes.ok) {
+      const check = await checkRes.json();
+      setUserAttempt(check.existingAttempt);
     }
     setLoading(false);
   }, [params.id]);
@@ -102,6 +116,25 @@ export default function TakeExamPage() {
     <div className="min-h-screen flex flex-col items-center justify-center gap-4">
       <div className="card text-center text-red-500 py-8">{error}</div>
       <Link href="/" className="text-teal-600 hover:underline">العودة للرئيسية</Link>
+    </div>
+  );
+  if (userAttempt) return (
+    <div className="min-h-screen flex flex-col items-center justify-center gap-4">
+      <div className="card text-center max-w-md">
+        <h2 className="text-xl font-bold text-slate-700 mb-3">لقد اكملت هذا الاختبار مسبقا</h2>
+        <p className="text-slate-500 mb-2">
+          نتيجتك: <span className="font-bold text-teal-600">{userAttempt.score}/{userAttempt.total}</span>
+        </p>
+        <p className="text-slate-400 text-sm mb-4">يمكنك محاولة كل اختبار مرة واحدة فقط</p>
+        <div className="flex gap-3 justify-center">
+          <Link href={`/exams/${params.id}/results?attempt=${userAttempt.id}`} className="btn-primary text-sm">
+            عرض نتيجتي
+          </Link>
+          <Link href="/" className="btn-secondary text-sm">
+            العودة للرئيسية
+          </Link>
+        </div>
+      </div>
     </div>
   );
   if (!exam) return null;

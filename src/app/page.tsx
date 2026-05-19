@@ -36,6 +36,8 @@ export default async function HomePage() {
       })
     : [];
 
+  const completedExamIds = new Set(myHistory.map((a) => a.examId));
+
   return (
     <div className="min-h-screen">
       <header className="bg-gradient-to-r from-teal-600 to-teal-700 text-white shadow-lg">
@@ -71,22 +73,37 @@ export default async function HomePage() {
               </div>
             ) : (
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {exams.map((exam) => (
-                  <Link
-                    key={exam.id}
-                    href={`/exams/${exam.id}`}
-                    className="card hover:shadow-md transition group border border-transparent hover:border-teal-200"
-                  >
-                    <h3 className="text-lg font-bold text-slate-800 mb-2">{exam.title}</h3>
-                    {exam.description && (
-                      <p className="text-slate-500 text-sm mb-4">{exam.description}</p>
-                    )}
-                    <div className="flex gap-4 text-sm text-slate-400">
-                      <span>{exam._count.questions} اسئلة</span>
-                      <span>{exam._count.attempts} محاولة</span>
-                    </div>
-                  </Link>
-                ))}
+                {exams.map((exam) => {
+                  const completed = completedExamIds.has(exam.id);
+                  const myAttempt = myHistory.find((a) => a.examId === exam.id);
+                  return (
+                    <Link
+                      key={exam.id}
+                      href={completed && myAttempt ? `/exams/${exam.id}/results?attempt=${myAttempt.id}` : `/exams/${exam.id}`}
+                      className={`card hover:shadow-md transition group border ${
+                        completed
+                          ? "border-green-200 bg-green-50/50"
+                          : "border-transparent hover:border-teal-200"
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <h3 className="text-lg font-bold text-slate-800 mb-2">{exam.title}</h3>
+                        {completed && (
+                          <span className="bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap">
+                            تم
+                          </span>
+                        )}
+                      </div>
+                      {exam.description && (
+                        <p className="text-slate-500 text-sm mb-4">{exam.description}</p>
+                      )}
+                      <div className="flex gap-4 text-sm text-slate-400">
+                        <span>{exam._count.questions} اسئلة</span>
+                        <span>{exam._count.attempts} محاولة</span>
+                      </div>
+                    </Link>
+                  );
+                })}
               </div>
             )}
 

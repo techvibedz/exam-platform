@@ -15,6 +15,14 @@ export async function POST(
   const examId = parseInt(id);
   const { answers } = await request.json();
 
+  const existing = await prisma.attempt.findFirst({
+    where: { examId, userId: user.userId },
+  });
+
+  if (existing) {
+    return NextResponse.json({ error: "لقد اكملت هذا الاختبار مسبقا. يمكنك محاولة كل اختبار مرة واحدة فقط." }, { status: 409 });
+  }
+
   const exam = await prisma.exam.findUnique({
     where: { id: examId },
     include: {
