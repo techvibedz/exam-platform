@@ -24,12 +24,13 @@ model Exam {
 }
 
 model Question {
-  id       Int      @id @default(autoincrement())
-  examId   Int
-  exam     Exam     @relation(fields: [examId], references: [id], onDelete: Cascade)
-  text     String
-  orderNum Int      @default(0)
-  options  Option[]
+  id          Int      @id @default(autoincrement())
+  examId      Int
+  exam        Exam     @relation(fields: [examId], references: [id], onDelete: Cascade)
+  text        String
+  orderNum    Int      @default(0)
+  multiAnswer Boolean  @default(false)
+  options     Option[]
 }
 
 model Option {

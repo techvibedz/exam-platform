@@ -14,6 +14,7 @@ interface Question {
   id: number;
   text: string;
   orderNum: number;
+  multiAnswer: boolean;
   options: Option[];
 }
 
@@ -50,13 +51,17 @@ export default function TakeExamPage() {
 
   useEffect(() => { loadExam(); }, [loadExam]);
 
-  function toggleOption(qId: number, oId: number) {
+  function toggleOption(qId: number, oId: number, multiAnswer: boolean) {
     setAnswers((p) => {
       const current = p[qId] || [];
-      const next = current.includes(oId)
-        ? current.filter((id) => id !== oId)
-        : [...current, oId];
-      return { ...p, [qId]: next };
+      if (multiAnswer) {
+        const next = current.includes(oId)
+          ? current.filter((id) => id !== oId)
+          : [...current, oId];
+        return { ...p, [qId]: next };
+      } else {
+        return { ...p, [qId]: [oId] };
+      }
     });
   }
 
@@ -119,7 +124,7 @@ export default function TakeExamPage() {
       <main className="max-w-3xl mx-auto px-4 py-8 space-y-6">
         {exam.questions.map((q, qi) => {
           const selected = answers[q.id] || [];
-          const hasCorrectAnswers = q.options.some((o) => o.isCorrect);
+          const isMulti = q.multiAnswer;
           return (
             <div key={q.id} className="card">
               <h3 className="font-bold text-slate-800 mb-4 flex items-start gap-2">
@@ -128,8 +133,8 @@ export default function TakeExamPage() {
                 </span>
                 <span>
                   {q.text}
-                  {hasCorrectAnswers && q.options.filter((o) => o.isCorrect).length > 1 && (
-                    <span className="text-xs text-amber-500 font-normal mr-2">(يمكن اختيار اكثر من اجابة)</span>
+                  {isMulti && (
+                    <span className="text-xs text-amber-500 font-normal mr-2">(اختيار متعدد)</span>
                   )}
                 </span>
               </h3>
@@ -144,10 +149,11 @@ export default function TakeExamPage() {
                     }`}
                   >
                     <input
-                      type="checkbox"
+                      type={isMulti ? "checkbox" : "radio"}
+                      name={`q_${q.id}`}
                       checked={selected.includes(o.id)}
-                      onChange={() => toggleOption(q.id, o.id)}
-                      className="w-4 h-4 text-teal-600 rounded"
+                      onChange={() => toggleOption(q.id, o.id, isMulti)}
+                      className={`${isMulti ? "rounded" : ""} w-4 h-4 text-teal-600`}
                     />
                     <span className="text-sm">{o.text}</span>
                   </label>

@@ -14,6 +14,7 @@ interface Question {
   id: number;
   text: string;
   orderNum: number;
+  multiAnswer: boolean;
   options: Option[];
 }
 
@@ -77,6 +78,15 @@ export default function EditExamPage() {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ isCorrect: !current }),
+    });
+    loadExam();
+  }
+
+  async function toggleMultiAnswer(qId: number, current: boolean) {
+    await fetch(`/api/questions/${qId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ multiAnswer: !current }),
     });
     loadExam();
   }
@@ -196,7 +206,16 @@ export default function EditExamPage() {
             </div>
 
             <div className="space-y-2 pr-9">
-              <p className="text-xs text-slate-400 mb-1">يمكن اختيار اكثر من اجابة صحيحة</p>
+              <button
+                onClick={() => toggleMultiAnswer(q.id, q.multiAnswer)}
+                className={`text-xs px-3 py-1 rounded-full border transition ${
+                  q.multiAnswer
+                    ? "bg-amber-50 border-amber-400 text-amber-700"
+                    : "bg-slate-50 border-slate-300 text-slate-500"
+                }`}
+              >
+                {q.multiAnswer ? "اجابة متعددة" : "اجابة واحدة"}
+              </button>
               {q.options.map((o) => (
                 <div key={o.id} className="flex items-center gap-2">
                   <button
