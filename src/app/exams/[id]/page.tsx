@@ -147,7 +147,10 @@ export default function TakeExamPage() {
             <h1 className="text-xl font-bold">{exam.title}</h1>
             <p className="text-teal-200 text-sm">{exam.questions.length} اسئلة</p>
           </div>
-          <div className="text-sm">
+          <div className="flex items-center gap-3 text-sm">
+            <Link href={`/exams/${params.id}/leaderboard`} className="bg-white/20 hover:bg-white/30 px-3 py-1 rounded-full transition">
+              المتصدرون
+            </Link>
             <span className="bg-white/20 px-3 py-1 rounded-full">
               {answeredCount}/{exam.questions.length} مجاب
             </span>

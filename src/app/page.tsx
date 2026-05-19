@@ -77,9 +77,8 @@ export default async function HomePage() {
                   const completed = completedExamIds.has(exam.id);
                   const myAttempt = myHistory.find((a) => a.examId === exam.id);
                   return (
-                    <Link
+                    <div
                       key={exam.id}
-                      href={completed && myAttempt ? `/exams/${exam.id}/results?attempt=${myAttempt.id}` : `/exams/${exam.id}`}
                       className={`card hover:shadow-md transition group border ${
                         completed
                           ? "border-green-200 bg-green-50/50"
@@ -87,7 +86,12 @@ export default async function HomePage() {
                       }`}
                     >
                       <div className="flex items-start justify-between gap-2">
-                        <h3 className="text-lg font-bold text-slate-800 mb-2">{exam.title}</h3>
+                        <Link
+                          href={completed && myAttempt ? `/exams/${exam.id}/results?attempt=${myAttempt.id}` : `/exams/${exam.id}`}
+                          className="text-lg font-bold text-slate-800 mb-2 hover:text-teal-600"
+                        >
+                          {exam.title}
+                        </Link>
                         {completed && (
                           <span className="bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap">
                             تم
@@ -97,11 +101,17 @@ export default async function HomePage() {
                       {exam.description && (
                         <p className="text-slate-500 text-sm mb-4">{exam.description}</p>
                       )}
-                      <div className="flex gap-4 text-sm text-slate-400">
+                      <div className="flex gap-4 text-sm text-slate-400 items-center">
                         <span>{exam._count.questions} اسئلة</span>
                         <span>{exam._count.attempts} محاولة</span>
+                        <Link
+                          href={`/exams/${exam.id}/leaderboard`}
+                          className="text-teal-500 hover:text-teal-700 font-medium mr-auto"
+                        >
+                          المتصدرون
+                        </Link>
                       </div>
-                    </Link>
+                    </div>
                   );
                 })}
               </div>
