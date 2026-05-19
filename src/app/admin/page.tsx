@@ -3,6 +3,7 @@ import { getAdminFromCookies } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import AdminClient from "./AdminClient";
+import ChangePasswordButton from "./ChangePasswordButton";
 
 export const dynamic = "force-dynamic";
 
@@ -32,6 +33,7 @@ export default async function AdminPage() {
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
           <h1 className="text-xl font-bold">لوحة التحكم - المشرف</h1>
           <div className="flex gap-3">
+            <ChangePasswordButton />
             <Link href="/admin/exams/create" className="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg transition">
               اختبار جديد +
             </Link>

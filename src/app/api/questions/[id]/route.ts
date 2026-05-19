@@ -12,13 +12,14 @@ export async function PATCH(
   }
 
   const { id } = await params;
-  const { text, orderNum, multiAnswer } = await request.json();
+  const { text, orderNum, multiAnswer, description } = await request.json();
   const question = await prisma.question.update({
     where: { id: parseInt(id) },
     data: {
       ...(text !== undefined && { text }),
       ...(orderNum !== undefined && { orderNum }),
       ...(multiAnswer !== undefined && { multiAnswer }),
+      ...(description !== undefined && { description }),
     },
   });
   return NextResponse.json(question);

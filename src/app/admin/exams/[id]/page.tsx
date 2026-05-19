@@ -13,6 +13,7 @@ interface Option {
 interface Question {
   id: number;
   text: string;
+  description: string;
   orderNum: number;
   multiAnswer: boolean;
   options: Option[];
@@ -32,8 +33,10 @@ export default function EditExamPage() {
   const [exam, setExam] = useState<Exam | null>(null);
   const [loading, setLoading] = useState(true);
   const [newQuestion, setNewQuestion] = useState("");
+  const [newQuestionDesc, setNewQuestionDesc] = useState("");
   const [newOptions, setNewOptions] = useState<Record<number, string>>({});
   const [editQuestionText, setEditQuestionText] = useState<Record<number, string>>({});
+  const [editQuestionDesc, setEditQuestionDesc] = useState<Record<number, string>>({});
   const [editOptionText, setEditOptionText] = useState<Record<number, string>>({});
 
   const loadExam = useCallback(async () => {
@@ -49,9 +52,10 @@ export default function EditExamPage() {
     await fetch(`/api/exams/${exam!.id}/questions`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text: newQuestion.trim() }),
+      body: JSON.stringify({ text: newQuestion.trim(), description: newQuestionDesc.trim() }),
     });
     setNewQuestion("");
+    setNewQuestionDesc("");
     loadExam();
   }
 
@@ -111,6 +115,21 @@ export default function EditExamPage() {
     });
   }
 
+  async function saveQuestionDesc(qId: number) {
+    const description = editQuestionDesc[qId];
+    if (description === undefined) return;
+    await fetch(`/api/questions/${qId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ description }),
+    });
+    setEditQuestionDesc((p) => {
+      const c = { ...p };
+      delete c[qId];
+      return c;
+    });
+  }
+
   async function saveOptionText(oId: number) {
     const text = editOptionText[oId];
     if (text === undefined) return;
@@ -160,15 +179,21 @@ export default function EditExamPage() {
       <main className="max-w-3xl mx-auto px-4 py-8">
         <div className="card mb-6">
           <h2 className="font-bold text-slate-700 mb-3">اضافة سؤال جديد</h2>
-          <div className="flex gap-2">
+          <div className="flex flex-col gap-2">
             <input
               value={newQuestion}
               onChange={(e) => setNewQuestion(e.target.value)}
               placeholder="اكتب السؤال هنا..."
-              className="input-field flex-1"
+              className="input-field"
               onKeyDown={(e) => e.key === "Enter" && addQuestion()}
             />
-            <button onClick={addQuestion} className="btn-primary whitespace-nowrap">
+            <input
+              value={newQuestionDesc}
+              onChange={(e) => setNewQuestionDesc(e.target.value)}
+              placeholder="وصف السؤال (اختياري)..."
+              className="input-field text-sm"
+            />
+            <button onClick={addQuestion} className="btn-primary whitespace-nowrap self-start">
               اضافة
             </button>
           </div>
@@ -198,6 +223,34 @@ export default function EditExamPage() {
                   >
                     {q.text}
                   </strong>
+                )}
+              </div>
+              <div className="pr-9 mb-2">
+                {editQuestionDesc[q.id] !== undefined ? (
+                  <div className="flex gap-2">
+                    <input
+                      value={editQuestionDesc[q.id]}
+                      onChange={(e) => setEditQuestionDesc((p) => ({ ...p, [q.id]: e.target.value }))}
+                      placeholder="وصف السؤال (اختياري)..."
+                      className="input-field text-sm py-1 flex-1"
+                      onKeyDown={(e) => e.key === "Enter" && saveQuestionDesc(q.id)}
+                    />
+                    <button onClick={() => saveQuestionDesc(q.id)} className="btn-primary text-xs py-1 px-2">حفظ</button>
+                  </div>
+                ) : q.description ? (
+                  <p
+                    className="text-xs text-slate-400 cursor-pointer hover:text-teal-600"
+                    onClick={() => setEditQuestionDesc((p) => ({ ...p, [q.id]: q.description }))}
+                  >
+                    {q.description}
+                  </p>
+                ) : (
+                  <span
+                    className="text-xs text-slate-300 cursor-pointer hover:text-teal-500"
+                    onClick={() => setEditQuestionDesc((p) => ({ ...p, [q.id]: "" }))}
+                  >
+                    + اضافة وصف للسؤال
+                  </span>
                 )}
               </div>
               <button onClick={() => deleteQuestion(q.id)} className="text-red-500 hover:text-red-700 text-sm mr-2 shrink-0">

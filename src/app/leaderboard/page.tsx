@@ -105,7 +105,6 @@ export default async function LeaderboardPage() {
                   <th className="text-right py-3 px-4 text-slate-500 font-semibold">الاختبار</th>
                   <th className="text-right py-3 px-4 text-slate-500 font-semibold">النتيجة</th>
                   <th className="text-right py-3 px-4 text-slate-500 font-semibold">التاريخ</th>
-                  <th className="text-right py-3 px-4 text-slate-500 font-semibold"></th>
                 </tr>
               </thead>
               <tbody>
@@ -121,16 +120,7 @@ export default async function LeaderboardPage() {
                     <td className="py-3 px-4 text-slate-400">
                       {new Date(a.completedAt).toLocaleDateString("ar-EG")}
                     </td>
-                    <td className="py-3 px-4">
-                      <Link
-                        href={`/exams/${a.exam.id}/results?attempt=${a.id}`}
-                        className="text-teal-600 hover:text-teal-800 text-sm font-medium"
-                      >
-                        تفاصيل
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
+                  </tr>))}
               </tbody>
             </table>
           </div>

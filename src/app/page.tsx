@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { cookies } from "next/headers";
 import SignInForm from "./SignInForm";
+import LogoutButton from "./LogoutButton";
 import { getUserFromCookies } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
@@ -55,8 +56,9 @@ export default async function HomePage() {
         {!user && <SignInForm />}
 
         {user && (
-          <div className="mb-6 bg-teal-50 border border-teal-200 text-teal-800 px-4 py-3 rounded-lg">
-            مرحبا بك، <strong>{user.name}</strong>
+          <div className="mb-6 bg-teal-50 border border-teal-200 text-teal-800 px-4 py-3 rounded-lg flex items-center justify-between">
+            <span>مرحبا بك، <strong>{user.name}</strong></span>
+            <LogoutButton />
           </div>
         )}
 

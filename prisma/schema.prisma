@@ -29,6 +29,7 @@ model Question {
   examId      Int
   exam        Exam     @relation(fields: [examId], references: [id], onDelete: Cascade)
   text        String
+  description String?  @default("")
   orderNum    Int      @default(0)
   multiAnswer Boolean  @default(false)
   options     Option[]

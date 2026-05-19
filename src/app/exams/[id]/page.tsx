@@ -13,6 +13,7 @@ interface Option {
 interface Question {
   id: number;
   text: string;
+  description: string;
   orderNum: number;
   multiAnswer: boolean;
   options: Option[];
@@ -138,6 +139,9 @@ export default function TakeExamPage() {
                   )}
                 </span>
               </h3>
+              {q.description && (
+                <p className="text-sm text-slate-400 mb-3 pr-9">{q.description}</p>
+              )}
               <div className="space-y-2 pr-9">
                 {q.options.map((o) => (
                   <label

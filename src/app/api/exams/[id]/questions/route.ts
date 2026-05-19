@@ -13,7 +13,7 @@ export async function POST(
 
   const { id } = await params;
   const examId = parseInt(id);
-  const { text } = await request.json();
+  const { text, description } = await request.json();
 
   if (!text?.trim()) {
     return NextResponse.json({ error: "نص السؤال مطلوب" }, { status: 400 });
@@ -21,7 +21,7 @@ export async function POST(
 
   const count = await prisma.question.count({ where: { examId } });
   const question = await prisma.question.create({
-    data: { examId, text: text.trim(), orderNum: count },
+    data: { examId, text: text.trim(), description: description?.trim() || "", orderNum: count },
   });
   return NextResponse.json(question, { status: 201 });
 }
