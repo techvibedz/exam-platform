@@ -4,6 +4,8 @@ import { cookies } from "next/headers";
 import SignInForm from "./SignInForm";
 import { getUserFromCookies } from "@/lib/auth";
 
+export const dynamic = "force-dynamic";
+
 export default async function HomePage() {
   const user = await getUserFromCookies();
   const exams = await prisma.exam.findMany({
