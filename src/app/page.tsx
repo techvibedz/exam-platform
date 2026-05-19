@@ -25,6 +25,16 @@ export default async function HomePage() {
     },
   });
 
+  const myHistory = user
+    ? await prisma.attempt.findMany({
+        where: { userId: user.userId },
+        orderBy: { completedAt: "desc" },
+        include: {
+          exam: { select: { id: true, title: true } },
+        },
+      })
+    : [];
+
   return (
     <div className="min-h-screen">
       <header className="bg-gradient-to-r from-teal-600 to-teal-700 text-white shadow-lg">
@@ -76,6 +86,53 @@ export default async function HomePage() {
                   </Link>
                 ))}
               </div>
+            )}
+
+            {myHistory.length > 0 && (
+              <>
+                <h2 className="text-xl font-bold mb-6 mt-12 text-slate-700">سجل محاولاتي</h2>
+                <div className="card overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="text-right py-3 px-4 text-slate-500 font-semibold">الاختبار</th>
+                        <th className="text-right py-3 px-4 text-slate-500 font-semibold">النتيجة</th>
+                        <th className="text-right py-3 px-4 text-slate-500 font-semibold">التاريخ</th>
+                        <th className="text-right py-3 px-4 text-slate-500 font-semibold"></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {myHistory.map((a) => (
+                        <tr key={a.id} className="border-b last:border-0">
+                          <td className="py-3 px-4 font-medium">{a.exam.title}</td>
+                          <td className="py-3 px-4">
+                            <span className={`px-2 py-1 rounded font-bold text-sm ${
+                              a.total > 0 && a.score / a.total >= 0.7
+                                ? "bg-green-100 text-green-700"
+                                : a.total > 0 && a.score / a.total >= 0.5
+                                ? "bg-amber-100 text-amber-700"
+                                : "bg-red-100 text-red-700"
+                            }`}>
+                              {a.score}/{a.total}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4 text-slate-400 text-sm">
+                            {new Date(a.completedAt).toLocaleDateString("ar-EG")}
+                          </td>
+                          <td className="py-3 px-4">
+                            <Link
+                              href={`/exams/${a.exam.id}/results?attempt=${a.id}`}
+                              className="text-teal-600 hover:text-teal-800 text-sm font-medium"
+                            >
+                              عرض التفاصيل
+                            </Link>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
             )}
 
             <h2 className="text-xl font-bold mb-6 mt-12 text-slate-700">لوحة المتصدرين</h2>

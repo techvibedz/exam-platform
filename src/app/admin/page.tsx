@@ -22,7 +22,7 @@ export default async function AdminPage() {
     orderBy: { completedAt: "desc" },
     include: {
       user: { select: { name: true } },
-      exam: { select: { title: true } },
+      exam: { select: { id: true, title: true } },
     },
   });
 
@@ -107,6 +107,7 @@ export default async function AdminPage() {
                   <th className="text-right py-3 px-4 text-slate-500">الاختبار</th>
                   <th className="text-right py-3 px-4 text-slate-500">النتيجة</th>
                   <th className="text-right py-3 px-4 text-slate-500">التاريخ</th>
+                  <th className="text-right py-3 px-4 text-slate-500"></th>
                 </tr>
               </thead>
               <tbody>
@@ -121,6 +122,14 @@ export default async function AdminPage() {
                     </td>
                     <td className="py-3 px-4 text-slate-400">
                       {new Date(a.completedAt).toLocaleDateString("ar-EG")}
+                    </td>
+                    <td className="py-3 px-4">
+                      <Link
+                        href={`/exams/${a.exam.id}/results?attempt=${a.id}`}
+                        className="text-teal-600 hover:text-teal-800 text-sm font-medium"
+                      >
+                        عرض الاجابات
+                      </Link>
                     </td>
                   </tr>
                 ))}

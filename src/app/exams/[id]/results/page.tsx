@@ -5,7 +5,7 @@ import { useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 interface ResultData {
-  attempt: { id: number; score: number; total: number };
+  attempt: { id: number; score: number; total: number; user?: { name: string }; completedAt?: string };
   exam: {
     id: number;
     title: string;
@@ -27,11 +27,23 @@ export default function ResultsPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const stored = sessionStorage.getItem(`result_${attemptId}`);
-    if (stored) {
-      setData(JSON.parse(stored));
+    async function load() {
+      if (!attemptId) { setLoading(false); return; }
+
+      const stored = sessionStorage.getItem(`result_${attemptId}`);
+      if (stored) {
+        setData(JSON.parse(stored));
+        setLoading(false);
+        return;
+      }
+
+      const res = await fetch(`/api/attempts/${attemptId}`);
+      if (res.ok) {
+        setData(await res.json());
+      }
       setLoading(false);
     }
+    load();
   }, [attemptId]);
 
   if (loading) return <div className="min-h-screen flex items-center justify-center text-slate-500">جاري التحميل...</div>;
@@ -66,6 +78,14 @@ export default function ResultsPage() {
       <main className="max-w-3xl mx-auto px-4 py-8">
         <div className="card text-center mb-8">
           <h2 className="text-xl font-bold text-slate-700 mb-2">{exam.title}</h2>
+          {attempt.user?.name && (
+            <p className="text-slate-400 text-sm mb-2">المستخدم: {attempt.user.name}</p>
+          )}
+          {attempt.completedAt && (
+            <p className="text-slate-400 text-xs mb-3">
+              {new Date(attempt.completedAt).toLocaleDateString("ar-EG")}
+            </p>
+          )}
           <div className="text-5xl font-extrabold text-teal-600 my-4">
             {attempt.score}/{attempt.total}
           </div>
