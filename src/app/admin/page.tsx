@@ -11,21 +11,22 @@ export default async function AdminPage() {
   const adminId = await getAdminFromCookies();
   if (!adminId) redirect("/admin/login");
 
-  const exams = await prisma.exam.findMany({
-    include: {
-      _count: { select: { questions: true, attempts: true } },
-    },
-    orderBy: { createdAt: "desc" },
-  });
-
-  const attempts = await prisma.attempt.findMany({
-    take: 20,
-    orderBy: { completedAt: "desc" },
-    include: {
-      user: { select: { name: true } },
-      exam: { select: { id: true, title: true } },
-    },
-  });
+  const [exams, attempts] = await Promise.all([
+    prisma.exam.findMany({
+      include: {
+        _count: { select: { questions: true, attempts: true } },
+      },
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.attempt.findMany({
+      take: 20,
+      orderBy: { completedAt: "desc" },
+      include: {
+        user: { select: { name: true } },
+        exam: { select: { id: true, title: true } },
+      },
+    }),
+  ]);
 
   return (
     <div className="min-h-screen bg-gray-50">

@@ -4,32 +4,40 @@ import Link from "next/link";
 export const dynamic = "force-dynamic";
 
 export default async function LeaderboardPage() {
-  const attempts = await prisma.attempt.findMany({
-    orderBy: { score: "desc" },
-    select: {
-      id: true,
-      score: true,
-      total: true,
-      completedAt: true,
-      user: { select: { name: true } },
-      exam: { select: { title: true, id: true } },
-    },
-  });
-
-  const stats = await prisma.user.findMany({
-    include: {
-      _count: { select: { attempts: true } },
-      attempts: {
-        select: { score: true, total: true },
+  const [attempts, grouped] = await Promise.all([
+    prisma.attempt.findMany({
+      take: 50,
+      orderBy: { completedAt: "desc" },
+      select: {
+        id: true,
+        score: true,
+        total: true,
+        completedAt: true,
+        user: { select: { name: true } },
+        exam: { select: { title: true, id: true } },
       },
-    },
-  });
+    }),
+    prisma.attempt.groupBy({
+      by: ["userId"],
+      _sum: { score: true, total: true },
+      _count: { _all: true },
+    }),
+  ]);
 
-  const userStats = stats.map((u) => ({
-    name: u.name,
-    attempts: u._count.attempts,
-    totalScore: u.attempts.reduce((s, a) => s + a.score, 0),
-    totalPossible: u.attempts.reduce((s, a) => s + a.total, 0),
+  const userIds = grouped.map((g) => g.userId);
+  const users = userIds.length
+    ? await prisma.user.findMany({
+        where: { id: { in: userIds } },
+        select: { id: true, name: true },
+      })
+    : [];
+  const nameById = new Map(users.map((u) => [u.id, u.name]));
+
+  const userStats = grouped.map((g) => ({
+    name: nameById.get(g.userId) ?? "",
+    attempts: g._count._all,
+    totalScore: g._sum.score ?? 0,
+    totalPossible: g._sum.total ?? 0,
   }));
 
   return (

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function AdminLoginPage() {
   const [username, setUsername] = useState("");
@@ -61,7 +62,7 @@ export default function AdminLoginPage() {
           </button>
         </form>
         <div className="mt-4 text-center">
-          <a href="/" className="text-teal-600 hover:underline text-sm">العودة للرئيسية</a>
+          <Link href="/" className="text-teal-600 hover:underline text-sm">العودة للرئيسية</Link>
         </div>
       </div>
     </div>

@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { cookies } from "next/headers";
 import SignInForm from "./SignInForm";
 import LogoutButton from "./LogoutButton";
 import { getUserFromCookies } from "@/lib/auth";
@@ -9,32 +8,33 @@ export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   const user = await getUserFromCookies();
-  const exams = await prisma.exam.findMany({
-    where: { isPublished: true },
-    include: {
-      _count: { select: { questions: true, attempts: true } },
-    },
-    orderBy: { createdAt: "desc" },
-  });
 
-  const leaderboard = await prisma.attempt.findMany({
-    take: 10,
-    orderBy: { score: "desc" },
-    include: {
-      user: { select: { name: true } },
-      exam: { select: { title: true } },
-    },
-  });
-
-  const myHistory = user
-    ? await prisma.attempt.findMany({
-        where: { userId: user.userId },
-        orderBy: { completedAt: "desc" },
-        include: {
-          exam: { select: { id: true, title: true } },
-        },
-      })
-    : [];
+  const [exams, leaderboard, myHistory] = await Promise.all([
+    prisma.exam.findMany({
+      where: { isPublished: true },
+      include: {
+        _count: { select: { questions: true, attempts: true } },
+      },
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.attempt.findMany({
+      take: 10,
+      orderBy: { score: "desc" },
+      include: {
+        user: { select: { name: true } },
+        exam: { select: { title: true } },
+      },
+    }),
+    user
+      ? prisma.attempt.findMany({
+          where: { userId: user.userId },
+          orderBy: { completedAt: "desc" },
+          include: {
+            exam: { select: { id: true, title: true } },
+          },
+        })
+      : Promise.resolve([]),
+  ]);
 
   const completedExamIds = new Set(myHistory.map((a) => a.examId));
 

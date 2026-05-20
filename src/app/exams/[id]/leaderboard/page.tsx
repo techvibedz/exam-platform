@@ -12,22 +12,23 @@ export default async function ExamLeaderboardPage({
   const { id } = await params;
   const examId = parseInt(id);
 
-  const exam = await prisma.exam.findUnique({
-    where: { id: examId },
-    include: {
-      _count: { select: { questions: true } },
-    },
-  });
+  const [exam, attempts] = await Promise.all([
+    prisma.exam.findUnique({
+      where: { id: examId },
+      include: {
+        _count: { select: { questions: true } },
+      },
+    }),
+    prisma.attempt.findMany({
+      where: { examId },
+      orderBy: { score: "desc" },
+      include: {
+        user: { select: { name: true } },
+      },
+    }),
+  ]);
 
   if (!exam) notFound();
-
-  const attempts = await prisma.attempt.findMany({
-    where: { examId },
-    orderBy: { score: "desc" },
-    include: {
-      user: { select: { name: true } },
-    },
-  });
 
   return (
     <div className="min-h-screen bg-gray-50">
